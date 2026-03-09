@@ -198,3 +198,6 @@ docker/*.tar
 # No one should see that :)
 .github/prompts/
 .github/copilot-instructions.md
+
+# Local settings
+.vscode/
