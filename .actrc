@@ -1,35 +1,23 @@
-# Platform Mappings
-# Use Ubuntu 24.04 specifically to match the host and current GitHub standards
+# Map runner labels to local Docker images
 -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-24.04
 -P ubuntu-24.04=ghcr.io/catthehacker/ubuntu:act-24.04
 -P ubuntu-22.04=ghcr.io/catthehacker/ubuntu:act-22.04
 
-# Dependency Caching (actions/cache)
-# Enables the internal server that 'actions/cache' talks to.
-# Stores dependencies in a local folder on the host machine.
---cache-server-path ~/.cache/actcache
+# Local cache server for actions/cache steps
+--cache-server-path $HOME/.cache/actcache
 
-# Action Caching
-# Caches the actions themselves (e.g. actions/checkout)
-# so act doesn't re-download them from GitHub every run.
---action-cache-path ~/.cache/act
+# Local disk cache for actions source code (e.g. actions/checkout, actions/setup-python)
+--action-cache-path $HOME/.cache/act
 
-# uv Package Cache
-# Mounts the host uv cache into the container.
-# uv sync reuses already-downloaded packages — no re-pulling.
---container-options "-v $HOME/.cache/uv:/root/.cache/uv"
+# Bind-mount the host uv package cache so uv sync skips re-downloading packages
+--container-options --mount=type=bind,source=$HOME/.cache/uv,target=/root/.cache/uv
 
-# Container Reuse
-# Reuses containers between runs instead of recreating them.
-# Speeds up reruns during active development.
+# reuse containers between runs instead of recreating them (disabled)
 # --reuse
-# --rm=false
 
-# General Settings
-# Use .secrets and .env files if they exist
+# Pass secrets and environment variables from files (disabled)
 # --secret-file .secrets
 # --env-file .env
 
-# Disable images pull if they already exist locally
-# Run 'docker pull ghcr.io/catthehacker/ubuntu:act-24.04' manually to refresh
+# Skip pulling image that already exists locally
 --pull=false
