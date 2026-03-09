@@ -43,5 +43,9 @@ jobs:
       - run: pip install uv
       - run: uv sync --all-groups
       - run: |
-          uv run pytest tests/unit tests/integration --cov=mastermind --cov-fail-under=80 || ec=$?
+          if find mastermind/ -name "*.py" | grep -q .; then
+            uv run pytest tests/unit tests/integration --cov=mastermind --cov-fail-under=80 || ec=$?
+          else
+            uv run pytest tests/unit tests/integration --no-cov || ec=$?
+          fi
           [ "${ec:-0}" -eq 0 ] || [ "${ec:-0}" -eq 5 ]
