@@ -1,34 +1,42 @@
-.PHONY: install lint format typecheck test test-unit test-cov train evaluate serve docker-build
+.PHONY: install pre-push ci-local lint format typecheck test test-unit test-cov train evaluate serve docker-build
 
 install:
 	uv sync --all-groups
 
+pre-push:
+	uv run ruff check .
+	@if find mastermind/ -name "*.py" | grep -q .; then uv run mypy mastermind/; else echo "mypy: no sources, skipping"; fi
+	@uv run pytest tests/unit tests/integration; ec=$$?; [ $$ec -eq 0 ] || [ $$ec -eq 5 ]
+
+ci-local:  ## lint only — typecheck/test jobs need 3 GB of ML deps, too heavy for act containers
+	act push -j lint
+
 lint:
-	ruff check .
+	uv run ruff check .
 
 format:
-	ruff format .
+	uv run ruff format .
 
 typecheck:
-	mypy mastermind/
+	uv run mypy mastermind/
 
 test:
-	pytest tests/
+	uv run pytest tests/
 
 test-unit:
-	pytest tests/unit/
+	uv run pytest tests/unit/
 
 test-cov:
-	pytest --cov=mastermind tests/
+	uv run pytest --cov=mastermind tests/
 
 train:
-	python scripts/train.py
+	uv run python scripts/train.py
 
 evaluate:
-	python scripts/evaluate.py
+	uv run python scripts/evaluate.py
 
 serve:
-	python scripts/serve.py
+	uv run python scripts/serve.py
 
 docker-build:
 	docker build -f docker/Dockerfile.serve -t mastermind-rl:serve .
