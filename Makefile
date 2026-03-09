@@ -3,7 +3,7 @@
 install:
 	uv sync --all-groups
 
-local-ci-check:
+ci-local:
 	act push
 
 lint:
