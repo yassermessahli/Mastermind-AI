@@ -201,3 +201,5 @@ docker/*.tar
 
 # Local settings
 .vscode/
+.editorconfig
+.gitattributes
