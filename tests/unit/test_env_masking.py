@@ -54,9 +54,9 @@ def test_update_always_retains_secret() -> None:
         secret_idx = CODE_TO_IDX[secret_code]
         feedback = compute_feedback(guess_idx, secret_idx)
         updated = update_consistent_set(initial, guess_idx, feedback)
-        assert (
-            secret_idx in updated
-        ), f"secret {secret_code} dropped after guess {guess_code} feedback {feedback}"
+        assert secret_idx in updated, (
+            f"secret {secret_code} dropped after guess {guess_code} feedback {feedback}"
+        )
 
 
 # update_consistent_set — immutability
