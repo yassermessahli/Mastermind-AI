@@ -1,0 +1,32 @@
+method: bayes
+run_cap: 30
+metric:
+  name: eval/avg_guesses
+  goal: minimize
+parameters:
+  learning_rate:
+    distribution: log_uniform_values
+    min: 1.0e-4
+    max: 1.0e-3
+  n_steps:
+    values: [512, 1024, 2048]
+  batch_size:
+    values: [32, 64, 128]
+  ent_coef:
+    distribution: log_uniform_values
+    min: 0.001
+    max: 0.1
+  n_epochs:
+    values: [3, 5, 10]
+  reward_variant:
+    values:
+      - sparse
+      - step_penalty
+      - shaped
+      - information
+  total_timesteps:
+    value: 20000
+  eval_freq:
+    value: 1000
+  n_eval_episodes:
+    value: 50

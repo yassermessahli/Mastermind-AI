@@ -27,6 +27,9 @@ test-cov:
 train:
 	uv run python scripts/train.py
 
+sweep:
+	uv run python scripts/sweep.py
+
 evaluate:
 	uv run python scripts/evaluate.py
 
