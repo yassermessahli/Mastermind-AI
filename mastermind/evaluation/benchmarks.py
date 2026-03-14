@@ -1,6 +1,7 @@
 from typing import Any
 
 import numpy as np
+import tqdm
 
 from mastermind.agents.base_agent import BaseAgent
 from mastermind.env.mastermind_env import MastermindEnv
@@ -22,7 +23,10 @@ def run_benchmark(
     wins: list[bool] = []
     total_rewards: list[float] = []
 
-    for _ in range(n_episodes):
+    for _ in tqdm.tqdm(
+        range(n_episodes),
+        desc=f"Benchmarking {agent.__class__.__name__} over {n_episodes} episodes",
+    ):
         obs, _ = env.reset()
         agent.reset()
         terminated = truncated = False
