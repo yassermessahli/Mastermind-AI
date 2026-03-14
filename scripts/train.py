@@ -103,7 +103,7 @@ def train(cfg: DictConfig) -> None:
     use_wandb: bool = bool(cfg.wandb.enabled)
     run: Any = None
     if use_wandb:
-        from omegaconf import OmegaConf
+        from omegaconf import OmegaConf  # noqa: I001
 
         import wandb
 

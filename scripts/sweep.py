@@ -1,6 +1,6 @@
 """W&B sweep entry point — wraps train.py for hyperparameter search."""
 
-from __future__ import annotations
+from __future__ import annotations  # noqa: I001
 
 import sys
 from pathlib import Path
