@@ -5,6 +5,7 @@ repos:
         name: ruff check
         entry: uv run ruff check
         language: system
+        stages: [pre-commit]
         types: [python]
         args: [--fix]
 
@@ -12,12 +13,20 @@ repos:
         name: ruff format
         entry: uv run ruff format
         language: system
+        stages: [pre-commit]
         types: [python]
 
       - id: mypy
         name: mypy
         entry: uv run mypy
         language: system
+        stages: [pre-commit]
         types: [python]
         pass_filenames: false
         args: [mastermind/]
+
+      - id: codespell-commit-msg
+        name: codespell commit message
+        entry: uv run codespell --config .codespellrc
+        language: system
+        stages: [commit-msg]
