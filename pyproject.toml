@@ -58,6 +58,7 @@ addopts = "--cov=mastermind --cov-report=term-missing"
 [tool.coverage.run]
 omit = [
     "mastermind/engine/play.py",
+    "mastermind/evaluation/plots.py",
 ]
 
 [tool.uv]
