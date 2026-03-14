@@ -1,0 +1,3 @@
+[codespell]
+check-hidden = true
+ignore-words-list = rl,ppo,maskableppo,sb3,gymnasium,pydantic,fastapi,hydra,wandb,pyenv,mypy,ruff,pomdp,mdp,knuth

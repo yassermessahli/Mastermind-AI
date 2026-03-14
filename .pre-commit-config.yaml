@@ -21,3 +21,9 @@ repos:
         types: [python]
         pass_filenames: false
         args: [mastermind/]
+
+      - id: codespell-commit-msg
+        name: codespell commit message
+        entry: uv run codespell --config .codespellrc
+        language: system
+        stages: [commit-msg]
