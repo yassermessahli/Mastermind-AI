@@ -203,3 +203,6 @@ docker/*.tar
 .vscode/
 .editorconfig
 .gitattributes
+
+# Local scripts
+scripts/run_bests.sh

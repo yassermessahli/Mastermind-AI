@@ -1,0 +1,4 @@
+reward_variant: sparse
+win_bonus: 1.0
+step_penalty: 0.0
+lose_penalty: 0.0
