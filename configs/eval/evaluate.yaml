@@ -1,0 +1,25 @@
+sweep_id: null
+model_path: null
+
+env:
+  n_colors: 6
+  n_pegs: 4
+  max_steps: 8
+  reward_variant: step_penalty
+  win_bonus: 1.0
+  step_penalty: -0.1
+  lose_penalty: -1.0
+
+evaluation:
+  n_episodes: 1296
+  output_dir: outputs/evaluation
+
+wandb:
+  project: mastermind-rl
+  entity: null
+  enabled: true
+
+hydra:
+  run:
+    dir: .
+  output_subdir: null

@@ -31,7 +31,7 @@ sweep:
 	uv run python scripts/sweep.py
 
 evaluate:
-	uv run python scripts/evaluate.py
+	uv run python scripts/evaluate.py model_path=outputs/sweep/rosy-sweep-30/model.zip
 
 serve:
 	uv run python scripts/serve.py
