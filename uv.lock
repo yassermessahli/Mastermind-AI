@@ -762,6 +762,9 @@ backend = [
     { name = "pytest-django" },
     { name = "python-decouple" },
 ]
+core = [
+    { name = "numpy" },
+]
 dev = [
     { name = "codespell" },
     { name = "httpx" },
@@ -799,6 +802,7 @@ backend = [
     { name = "pytest-django", specifier = ">=4.8" },
     { name = "python-decouple", specifier = ">=3.8" },
 ]
+core = [{ name = "numpy", specifier = ">=1.26" }]
 dev = [
     { name = "codespell", specifier = ">=2.4" },
     { name = "httpx", specifier = ">=0.27" },
