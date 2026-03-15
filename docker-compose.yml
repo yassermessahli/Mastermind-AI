@@ -1,17 +1,21 @@
 services:
+  # Django/Gunicorn backend — exposed only to the Docker network, not the host
   backend:
     build:
       context: .
       dockerfile: docker/Dockerfile.backend
+    image: yassermessahli/mastermind-backend:${VERSION:-latest}
     expose:
-      - "8001"
-    env_file: .env
+      - "8001"         # reachable by frontend container as http://backend:8001
+    env_file: .env     # loads DJANGO_SECRET_KEY, DJANGO_DEBUG, ALLOWED_HOSTS, CORS_ALLOWED_ORIGINS
 
+  # Nginx frontend — the only publicly accessible service
   frontend:
     build:
       context: .
       dockerfile: docker/Dockerfile.frontend
+    image: yassermessahli/mastermind-frontend:${VERSION:-latest}
     ports:
-      - "3000:80"
+      - "3000:80"      # browse at http://localhost:3000
     depends_on:
-      - backend
+      - backend        # ensures backend starts before nginx tries to proxy /api/
