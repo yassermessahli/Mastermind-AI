@@ -1,4 +1,4 @@
-.PHONY: install ci-local lint format typecheck test test-unit test-cov train evaluate serve docker-build
+.PHONY: install ci-local lint format typecheck test test-unit test-cov train evaluate serve docker-build backend-serve backend-test
 
 install:
 	uv sync --all-groups
@@ -38,3 +38,9 @@ serve:
 
 docker-build:
 	docker build -f docker/Dockerfile.serve -t mastermind-rl:serve .
+
+backend-serve:
+	cd web/server && DJANGO_SETTINGS_MODULE=config.settings uv run python manage.py runserver 8001
+
+backend-test:
+	cd web/server && uv run pytest game/
