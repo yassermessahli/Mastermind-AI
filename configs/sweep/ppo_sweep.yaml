@@ -1,29 +1,39 @@
+# Bayesian optimization — W&B models parameter interactions to pick promising configs
 method: bayes
+# Stop after 30 runs to balance search coverage against compute cost
 run_cap: 30
+# Minimize average guesses to solve: lower → faster, smarter agent
 metric:
   name: eval/avg_guesses
   goal: minimize
 parameters:
+  # Log-uniform search over learning rate avoids over-emphasizing large values
   learning_rate:
     distribution: log_uniform_values
     min: 1.0e-4
     max: 1.0e-3
+  # Rollout buffer size: larger buffers give lower-variance gradient estimates
   n_steps:
     values: [512, 1024, 2048]
+  # Minibatch size: smaller batches add gradient noise; larger are more stable
   batch_size:
     values: [32, 64, 128]
+  # Log-uniform entropy coefficient: controls exploration vs exploitation tradeoff
   ent_coef:
     distribution: log_uniform_values
     min: 0.001
     max: 0.1
+  # Epochs per update: more passes improve data efficiency but risk over-fitting
   n_epochs:
     values: [3, 5, 10]
+  # Compare all four reward variants in the same sweep
   reward_variant:
     values:
       - sparse
       - step_penalty
       - shaped
       - information
+  # Short run per sweep trial to keep wall-clock cost low
   total_timesteps:
     value: 20000
   eval_freq:

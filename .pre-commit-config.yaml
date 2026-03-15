@@ -1,6 +1,7 @@
 repos:
   - repo: local
     hooks:
+      # Lint Python files with ruff; --fix applies safe auto-fixes before committing
       - id: ruff-check
         name: ruff check
         entry: uv run ruff check
@@ -9,6 +10,7 @@ repos:
         types: [python]
         args: [--fix]
 
+      # Format Python files with ruff to enforce consistent style
       - id: ruff-format
         name: ruff format
         entry: uv run ruff format
@@ -16,6 +18,7 @@ repos:
         stages: [pre-commit]
         types: [python]
 
+      # Type-check the mastermind package; pass_filenames=false runs mypy on the whole package
       - id: mypy
         name: mypy
         entry: uv run mypy
@@ -25,6 +28,7 @@ repos:
         pass_filenames: false
         args: [mastermind/]
 
+      # Spell-check commit messages using the .codespellrc ignore list
       - id: codespell-commit-msg
         name: codespell commit message
         entry: uv run codespell --config .codespellrc

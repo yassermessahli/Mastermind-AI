@@ -1,44 +1,6 @@
 # MastermindAI — RL Agent for Mastermind
 
-A reinforcement learning agent that learns to play the Mastermind board game (4 pegs, 6 colors) using MaskablePPO. The agent is trained to beat human expert players by optimizing average-case performance rather than worst-case (Knuth). The final deliverable is a FastAPI service deployed in Docker that a human player can play against.
-
----
-
-## Setup
-
-**Requirements**: Python 3.13, [uv](https://docs.astral.sh/uv/)
-
-```bash
-make install
-```
-
----
-
-## Quick Start
-
-```bash
-# Train the agent
-make train
-
-# Evaluate against baselines
-make evaluate
-
-# Start the API server
-make serve
-```
-
----
-
-## Development
-
-```bash
-make lint        # ruff check .
-make format      # ruff format .
-make typecheck   # mypy mastermind/
-make test        # pytest tests/
-make test-unit   # pytest tests/unit/
-make test-cov    # pytest --cov=mastermind tests/
-```
+A reinforcement learning agent that learns to play Mastermind (4 pegs, 6 colors) using MaskablePPO. The agent optimizes average-case performance rather than worst-case (Knuth). A full-stack web app lets you play against the AI directly in the browser.
 
 ---
 
@@ -46,83 +8,103 @@ make test-cov    # pytest --cov=mastermind tests/
 
 ```
 mastermind-rl/
-│
-├── mastermind/                   # Core package
-│   ├── engine/
-│   │   ├── codes.py              # ALL_CODES, CODE_TO_IDX, FEEDBACK_TABLE
-│   │   ├── feedback.py           # compute_feedback() wrapping FEEDBACK_TABLE
-│   │   └── game.py               # MastermindGame — stateful session
-│   │
-│   ├── env/
-│   │   ├── mastermind_env.py     # Gymnasium env, step/reset/action_masks
-│   │   ├── obs_encoder.py        # ObservationEncoder — Option C
-│   │   └── masking.py            # Incremental consistent set + action_masks()
-│   │
-│   ├── agents/
-│   │   ├── random_agent.py       # Fully random baseline
-│   │   ├── consistent_agent.py   # Random but respects constraints
-│   │   └── knuth_agent.py        # Minimax ceiling reference
-│   │
-│   ├── evaluation/
-│   │   ├── benchmarks.py         # Run agent vs all baselines
-│   │   ├── metrics.py            # avg_guesses, win_rate, worst_case_dist
-│   │   └── plots.py              # Matplotlib result figures
-│   │
-│   └── api/
-│       ├── main.py               # FastAPI application
-│       ├── schemas.py            # Pydantic request/response models
-│       └── agent_service.py      # Loads prod model, serves predictions
-│
-├── tests/
-│   ├── unit/                     # Fast, isolated, no env/agent deps
-│   ├── integration/              # Engine ↔ Env ↔ Masking
-│   └── e2e/                      # Full API endpoint tests
-│
-├── configs/
-│   ├── train/ppo_baseline.yaml
-│   ├── reward/{sparse,step_penalty,shaped,information}.yaml
-│   └── sweep/ppo_sweep.yaml
-│
-├── scripts/
-│   ├── train.py
-│   ├── evaluate.py
-│   └── serve.py
-│
-├── docker/
-│   ├── Dockerfile.train
-│   ├── Dockerfile.serve
-│   └── docker-compose.yaml
-│
-└── docs/
-    └── mdp_definition.md
+├── mastermind/          # Core Python package: engine, Gymnasium env, agents, evaluation
+├── web/
+│   ├── server/          # Django REST Framework backend
+│   └── frontend/        # React + TypeScript + Vite frontend
+├── scripts/             # train.py, evaluate.py, sweep.py, serve.py
+├── configs/             # Hydra configs: training, reward variants, sweep
+├── tests/               # unit/, integration/
+├── docker/              # Dockerfile.backend, Dockerfile.frontend
+├── docker-compose.yml   # Full stack: backend + frontend
+└── docs/                # architecture.md, mdp_definition.md
 ```
+
+---
+
+## Quick Start
+
+### Web App (Docker)
+
+```bash
+cp .env.example .env          # set DJANGO_SECRET_KEY
+docker compose up --build
+```
+
+Open http://localhost:3000.
+
+### RL Training
+
+**Requirements**: Python 3.13, [uv](https://docs.astral.sh/uv/)
+
+```bash
+make install      # install all dependencies
+make train        # train with default config
+make evaluate     # benchmark against baselines
+make serve        # start FastAPI prediction server
+```
+
+---
+
+## Game Modes
+
+### Codebreaker
+You guess the secret code. After each guess the game shows black and white peg feedback. Black = correct color in correct position. White = correct color in wrong position. Guess correctly within the limit to win.
+
+### Codekeeper
+You pick a secret code in your head — never entered. The AI makes guesses. After each AI guess, you enter the correct black/white feedback. The AI uses your feedback to narrow down candidates and guess again. See how many guesses it takes the AI to crack your code.
 
 ---
 
 ## Baseline Benchmarks
 
-| Agent           | Avg Guesses | Win Rate | Notes                   |
-|-----------------|-------------|----------|-------------------------|
-| RandomAgent     | ~7–8        | low      | Floor — no constraints  |
-| ConsistentAgent | ~5–6        | medium   | Respects feedback       |
-| KnuthAgent      | ≤5 (worst)  | 100%     | Minimax ceiling         |
-| **RL Agent**    | **~4.3–4.5**| **~99%** | Target after training   |
+| Agent           | Avg Guesses | Win Rate | Notes                  |
+|-----------------|-------------|----------|------------------------|
+| RandomAgent     | ~7–8        | low      | Floor — no constraints |
+| ConsistentAgent | ~5–6        | medium   | Respects feedback      |
+| KnuthAgent      | ≤5 (worst)  | 100%     | Minimax ceiling        |
+| **RL Agent**    | **~4.3–4.5**| **~99%** | Target after training  |
+
+---
+
+## Screenshots
+
+![Codebreaker](docs/screenshots/codebreaker.png)
+
+*Screenshot placeholder — run the app to see the UI.*
 
 ---
 
 ## Tech Stack
 
-| Concern               | Tool                      |
-|-----------------------|---------------------------|
-| Language              | Python 3.13               |
-| RL environment        | Gymnasium                 |
-| RL algorithm          | MaskablePPO (sb3-contrib) |
-| Training tracking     | Weights & Biases          |
-| Config management     | Hydra                     |
-| API                   | FastAPI + Pydantic v2     |
-| Deployment            | Docker                    |
-| Dependency management | uv                        |
-| Linting / formatting  | Ruff                      |
-| Type checking         | Mypy                      |
-| Testing               | Pytest + pytest-cov       |
-| CI/CD                 | GitHub Actions            |
+| Concern               | Tool                         |
+|-----------------------|------------------------------|
+| Language (RL)         | Python 3.13                  |
+| RL environment        | Gymnasium                    |
+| RL algorithm          | MaskablePPO (sb3-contrib)    |
+| Training tracking     | Weights & Biases             |
+| Config management     | Hydra                        |
+| Backend framework     | Django 5 + DRF               |
+| Frontend framework    | React 18 + TypeScript + Vite |
+| Styling               | Tailwind CSS                 |
+| Deployment            | Docker + Nginx               |
+| Dependency management | uv                           |
+| Linting / formatting  | Ruff                         |
+| Type checking         | Mypy                         |
+| Testing               | Pytest + pytest-cov          |
+| CI/CD                 | GitHub Actions               |
+
+---
+
+## Development
+
+```bash
+make lint           # ruff check .
+make format         # ruff format .
+make typecheck      # mypy mastermind/
+make test           # pytest tests/
+make test-cov       # pytest --cov=mastermind tests/
+
+make backend-serve  # Django dev server on :8001
+make frontend-dev   # Vite dev server on :5173
+```
