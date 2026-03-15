@@ -1,4 +1,4 @@
-.PHONY: install ci-local lint format typecheck test test-unit test-cov train evaluate serve docker-build backend-serve backend-test
+.PHONY: install ci-local lint format typecheck test test-unit test-cov train evaluate serve docker-build backend-serve backend-test frontend-install frontend-dev frontend-build frontend-lint frontend-preview
 
 install:
 	uv sync --all-groups
@@ -44,3 +44,18 @@ backend-serve:
 
 backend-test:
 	cd web/server && uv run pytest game/
+
+frontend-install:
+	cd web/frontend && npm install
+
+frontend-dev:
+	cd web/frontend && npm run dev
+
+frontend-build:
+	cd web/frontend && npm run build
+
+frontend-lint:
+	cd web/frontend && npm run lint
+
+frontend-preview:
+	cd web/frontend && npm run preview
