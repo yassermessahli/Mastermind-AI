@@ -1,0 +1,16 @@
+FROM python:3.13-slim
+WORKDIR /app
+
+ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1
+
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+
+COPY pyproject.toml uv.lock ./
+COPY mastermind/ ./mastermind/
+COPY web/server/ ./web/server/
+
+RUN uv pip install --system --no-deps -e . && \
+    uv pip install --system --group core --group backend
+
+WORKDIR /app/web/server
+CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8001"]
