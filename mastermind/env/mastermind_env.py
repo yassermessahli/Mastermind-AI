@@ -26,6 +26,22 @@ _DEFAULTS: dict[str, Any] = {
 
 
 class MastermindEnv(gym.Env[np.ndarray, np.intp]):
+    """Gymnasium environment for the Mastermind code-breaking game.
+
+    The agent guesses a hidden code from a discrete action space of size
+    ``n_colors ** n_pegs`` (default 1296). After each guess the environment
+    returns an observation encoding the full guess/feedback history and the
+    size of the remaining consistent set.  Invalid actions (codes already
+    eliminated by feedback) are masked out via ``action_masks()``.
+
+    Parameters
+    ----------
+    config:
+        Optional dict of overrides for the defaults defined in ``_DEFAULTS``.
+        Keys: ``n_colors``, ``n_pegs``, ``max_steps``, ``reward_variant``,
+        ``win_bonus``, ``step_penalty``, ``lose_penalty``.
+    """
+
     metadata: dict[str, list[Any]] = {"render_modes": []}
 
     def __init__(self, config: dict[str, Any] | None = None) -> None:
@@ -56,6 +72,24 @@ class MastermindEnv(gym.Env[np.ndarray, np.intp]):
         seed: int | None = None,
         options: dict[str, Any] | None = None,
     ) -> tuple[np.ndarray, dict[str, Any]]:
+        """Start a new episode with a freshly sampled secret code.
+
+        Parameters
+        ----------
+        seed:
+            If provided, the secret is derived deterministically from this
+            seed via ``np_random``.  If ``None``, the secret is chosen
+            uniformly at random by ``MastermindGame``.
+        options:
+            Unused; present for Gymnasium API compatibility.
+
+        Returns
+        -------
+        obs:
+            Zero-padded observation vector of shape ``(obs_dim,)``.
+        info:
+            ``{"consistent_remaining": 1296}`` at episode start.
+        """
         super().reset(seed=seed)
         if seed is not None:
             secret_idx = int(self.np_random.integers(0, N_CODES))
@@ -73,6 +107,26 @@ class MastermindEnv(gym.Env[np.ndarray, np.intp]):
     def step(
         self, action: np.intp
     ) -> tuple[np.ndarray, float, bool, bool, dict[str, Any]]:
+        """Apply one guess and return the next observation, reward, and flags.
+
+        Parameters
+        ----------
+        action:
+            Index into ``ALL_CODES`` representing the guessed code.
+
+        Returns
+        -------
+        obs:
+            Updated observation encoding the full guess history.
+        reward:
+            Scalar reward computed by the configured reward variant.
+        terminated:
+            ``True`` when ``blacks == n_pegs`` (correct guess).
+        truncated:
+            ``True`` when the guess limit is reached without solving.
+        info:
+            ``{"blacks", "whites", "consistent_remaining", "n_guesses"}``.
+        """
         self._before_consistent_size = len(self._consistent_set)
         feedback = self._game.guess(int(action))
         blacks, whites = feedback
@@ -103,7 +157,11 @@ class MastermindEnv(gym.Env[np.ndarray, np.intp]):
         return obs, reward, terminated, truncated, info
 
     def action_masks(self) -> np.ndarray:
-        """Required by MaskablePPO. Returns bool mask of valid actions."""
+        """Return a bool mask of shape ``(1296,)`` for use with MaskablePPO.
+
+        ``True`` at index ``i`` means code ``ALL_CODES[i]`` is still consistent
+        with all feedback received so far.  At least one entry is always ``True``.
+        """
         return get_action_masks(self._consistent_set)
 
     def _compute_reward(self, blacks: int, whites: int) -> float:

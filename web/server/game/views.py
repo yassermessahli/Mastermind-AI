@@ -11,6 +11,14 @@ from game.session import clear_game_state, get_game_state, set_game_state
 
 @api_view(["POST"])
 def start(request):
+    """Start a new game session.
+
+    Body: ``{ mode, n_colors, n_pegs, max_steps }``
+
+    In *codebreaker* mode a random secret code is stored in the session.
+    In *codekeeper* mode the full consistent set is initialised and the AI
+    makes its first guess, which is included in the response.
+    """
     serializer = StartSerializer(data=request.data)
     if not serializer.is_valid():
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -84,6 +92,13 @@ def start(request):
 
 @api_view(["POST"])
 def guess(request):
+    """Submit a player guess in codebreaker mode.
+
+    Body: ``{ guess_idx }`` — index into the code space for the current board size.
+
+    Computes black/white feedback against the session secret, updates history,
+    and returns ``terminated`` (correct guess) or ``truncated`` (limit reached).
+    """
     state = get_game_state(request)
     if state is None:
         return Response(
@@ -139,6 +154,13 @@ def guess(request):
 
 @api_view(["POST"])
 def feedback(request):
+    """Submit the player's feedback for the AI's last guess in codekeeper mode.
+
+    Body: ``{ blacks, whites }`` — the correct feedback for the AI's most recent guess.
+
+    Filters the consistent set, advances the step counter, and returns the AI's
+    next guess (unless the game is over).
+    """
     state = get_game_state(request)
     if state is None:
         return Response(
@@ -206,6 +228,12 @@ def feedback(request):
 
 @api_view(["GET"])
 def game_state(request):
+    """Return the current session state without exposing secret information.
+
+    The ``secret_idx``, ``consistent_set``, and ``current_ai_guess_idx`` fields
+    are excluded from the response.  In codekeeper mode, ``consistent_set_size``
+    and the current ``ai_guess`` are added.
+    """
     state = get_game_state(request)
     if state is None:
         return Response({"detail": "No active game."}, status=status.HTTP_404_NOT_FOUND)
@@ -227,5 +255,6 @@ def game_state(request):
 
 @api_view(["POST"])
 def reset(request):
+    """Clear the current game session state."""
     clear_game_state(request)
     return Response({"ok": True})

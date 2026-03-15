@@ -5,6 +5,31 @@ from mastermind.engine.codes import ALL_CODES
 
 
 class ObservationEncoder:
+    """Encodes a Mastermind game history into a flat float32 observation vector.
+
+    Layout (default: 6 colors, 4 pegs, 8 max steps):
+
+    - ``max_steps`` step blocks of ``n_pegs * n_colors + 2`` floats each:
+        - ``n_pegs * n_colors`` one-hot color values (avoids false ordinal encoding)
+        - normalized blacks (blacks / n_pegs)
+        - normalized whites (whites / n_pegs)
+    - 1 float: fraction of consistent codes remaining (remaining / n_codes)
+    - 1 float: normalized step progress (current_step / max_steps)
+
+    Total dimension: ``max_steps * (n_pegs * n_colors + 2) + 2``
+    (210 for the default configuration).  All values in [0, 1].
+    Unseen future steps are zero-padded.
+
+    Parameters
+    ----------
+    n_colors:
+        Number of distinct peg colors.
+    n_pegs:
+        Number of pegs per code.
+    max_steps:
+        Maximum number of guesses per episode.
+    """
+
     def __init__(self, n_colors: int, n_pegs: int, max_steps: int) -> None:
         self._n_colors = n_colors
         self._n_pegs = n_pegs
@@ -15,11 +40,14 @@ class ObservationEncoder:
 
     @property
     def obs_dim(self) -> int:
-        """max_steps * (n_pegs * n_colors + 2) + 2"""
+        """Total observation vector length.
+
+        Formula: ``max_steps * (n_pegs * n_colors + 2) + 2``
+        """
         return self._obs_dim
 
     def observation_space(self) -> spaces.Box:
-        """low=0.0, high=1.0, shape=(obs_dim,), dtype=np.float32"""
+        """Return the Gymnasium Box space: shape ``(obs_dim,)``, values in [0, 1]."""
         return spaces.Box(
             low=0.0,
             high=1.0,
@@ -33,11 +61,23 @@ class ObservationEncoder:
         remaining_valid: int,
         current_step: int,
     ) -> np.ndarray:
-        """Return flat float32 array of shape (obs_dim,).
+        """Return a flat float32 observation vector of shape ``(obs_dim,)``.
 
-        history: [(guess_idx, (blacks, whites)), ...]
-        guess_idx is resolved to a code tuple via ALL_CODES internally.
-        Unseen steps are zero-padded.
+        Parameters
+        ----------
+        history:
+            List of ``(guess_idx, (blacks, whites))`` tuples in guess order.
+            ``guess_idx`` is resolved to a code tuple via ``ALL_CODES``.
+        remaining_valid:
+            Number of codes still consistent with all feedback so far.
+        current_step:
+            Number of guesses made so far (0 at episode start).
+
+        Returns
+        -------
+        np.ndarray
+            Float32 array of shape ``(obs_dim,)``.  Steps beyond
+            ``len(history)`` are zero-padded.
         """
         obs = np.zeros(self._obs_dim, dtype=np.float32)
 
