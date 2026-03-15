@@ -49,3 +49,14 @@ jobs:
             uv run pytest tests/unit tests/integration --no-cov || ec=$?
           fi
           [ "${ec:-0}" -eq 0 ] || [ "${ec:-0}" -eq 5 ]
+
+  backend-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install uv
+      - run: uv sync --group backend
+      - run: cd web/server && uv run pytest game/ --cov=game --cov-report=term-missing --cov-fail-under=80
