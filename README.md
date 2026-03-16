@@ -28,16 +28,13 @@ Mastermind is a code-breaking board game. A secret 4-peg code is chosen from 6 c
 
 The objective is to crack the code in as few guesses as possible.
 
-MastermindAI trains a reinforcement learning agent (MaskablePPO) to solve the game, achieving an average of ~4.3–4.5 guesses — beating rule-based strategies. The full-stack web app lets you play against the AI in two modes.
-
-## Run
+MastermindAI trains a reinforcement learning agent (MaskablePPO) to solve the game, achieving an average of ~4.3–4.5 guesses — beating rule-based strategies [see [benchmarks-table](#agent-benchmarks)]. The full-stack web app lets you play against the AI in two modes. Run:
 
 ```bash
-make web-run   # as easy as this
-
+make web-run   # as easy as that
 ```
 
-_open at http://localhost:3000_
+_open at port 3000_
 
 ## Agent Benchmarks
 
@@ -49,29 +46,28 @@ _open at http://localhost:3000_
 | **RL Agent**    | **~4.3–4.5** | **~99%** | Target after training  |
 
 ## Play
+Before starting, configure the game: number of colors, pegs, and maximum guesses allowed.
 
 <p align="center">
   <img src="docs/assets/images/settings.png" alt="Settings" width="75%"/>
 </p>
 
-Before starting, configure the game: number of colors, pegs, and maximum guesses allowed.
-
 ---
 
 ### Codebreaker Mode
+The AI holds a secret code — you guess it. Enter a color combination, receive black/white peg feedback, and keep narrowing it down until you crack the code or run out of attempts.
 
 <p align="center">
   <img src="docs/assets/images/codebreaker-mode.png" alt="Codebreaker Mode" width="75%"/>
 </p>
 
-The AI holds a secret code — you guess it. Enter a color combination, receive black/white peg feedback, and keep narrowing it down until you crack the code or run out of attempts.
 
 ---
 
 ### Codekeeper Mode
-
+You hold the secret code in your head — never typed in. The AI agent makes guesses and you provide honest black/white feedback after each one. Watch the AI systematically eliminate possibilities and deduce your code.
 <p align="center">
   <img src="docs/assets/images/codekeeper-mode.png" alt="Codekeeper Mode" width="75%"/>
 </p>
 
-You hold the secret code in your head — never typed in. The AI agent makes guesses and you provide honest black/white feedback after each one. Watch the AI systematically eliminate possibilities and deduce your code.
+
